@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{004E3C4A-7198-4EBA-8F91-C2381899A44A}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>notify</RootNamespace>
-    <AssemblyName>notify</AssemblyName>
+    <RootNamespace>Notification</RootNamespace>
+    <AssemblyName>Notification.WPF</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -63,7 +63,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="EmptyToVisibleConverter.cs" />
+    <Compile Include="Converters\EmptyToVisibleConverter.cs" />
+    <Compile Include="Converters\FontColorConverter.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -78,7 +79,11 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NotifyClass.cs" />
+    <Compile Include="Converters\MixColorConverter.cs" />
+    <Compile Include="NotificationType.cs" />
+    <Compile Include="NotificationOption.cs" />
+    <Compile Include="Converters\NotificationTypeConverter.cs" />
+    <Compile Include="Converters\NotificationTypeToCursorConverter.cs" />
     <Compile Include="NotifyControl.xaml.cs">
       <DependentUpon>NotifyControl.xaml</DependentUpon>
     </Compile>

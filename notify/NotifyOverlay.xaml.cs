@@ -1,35 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
-namespace notify
+namespace Notification
 {
     /// <summary>
     /// NotifyOverlay.xaml 的交互逻辑
     /// </summary>
     public partial class NotifyOverlay : UserControl
     {
-        private ObservableCollection<NotifyClass> _itemsSource;
+        private ObservableCollection<NotificationOption> _itemsSource;
 
         public NotifyOverlay()
         {
             InitializeComponent();
         }
 
-        public ObservableCollection<NotifyClass> ItemsSource
+        public ObservableCollection<NotificationOption> ItemsSource
         {
             get => _itemsSource;
             set
@@ -50,12 +38,12 @@ namespace notify
             {
                 foreach (var newItem in e.NewItems)
                 {
-                    TriggerIn((NotifyClass)newItem);
+                    TriggerIn((NotificationOption)newItem);
                 }
             }
         }
 
-        private void TriggerIn(NotifyClass newItem)
+        private void TriggerIn(NotificationOption newItem)
         {
             var sb = new NotifyControl(newItem, _itemsSource);
             NotifyStack.Children.Add(sb);
@@ -63,7 +51,7 @@ namespace notify
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-      
+
         }
     }
 }

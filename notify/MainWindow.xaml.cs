@@ -1,20 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
-namespace notify
+namespace Notification
 {
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
@@ -45,7 +34,7 @@ namespace notify
             InitializeComponent();
         }
 
-        private readonly ObservableCollection<NotifyClass> _notifyClasses = new ObservableCollection<NotifyClass>();
+        private readonly ObservableCollection<NotificationOption> _notifyClasses = new ObservableCollection<NotificationOption>();
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -54,8 +43,10 @@ namespace notify
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            _notifyClasses.Add(new NotifyClass
+            _notifyClasses.Add(new NotificationOption
             {
+                IconTemplate = (ControlTemplate)Application.Current.FindResource("SettingsTempl"),
+                NotificationType = (NotificationType)_rnd.Next(2),
                 FadeoutTime = TimeSpan.FromSeconds(0),
                 Content = _contentList[_rnd.Next(_contentList.Length)],
                 Title = _titleList[_rnd.Next(_titleList.Length)]

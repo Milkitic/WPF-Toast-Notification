@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace notify
+namespace Notification.Converters
 {
     public class EmptyToVisibleConverter : IValueConverter
     {
@@ -11,15 +11,12 @@ namespace notify
         {
             if (value is string s)
             {
-                return string.IsNullOrEmpty(s) ? Visibility.Collapsed : Visibility.Visible;
+                return string.IsNullOrEmpty(s)
+                    ? Visibility.Collapsed
+                    : Visibility.Visible;
             }
 
-            if (value is null)
-            {
-                return Visibility.Collapsed;
-            }
-
-            return Visibility.Visible;
+            return value is null ? Visibility.Collapsed : Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -1,218 +1,231 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
 
-namespace notify
+namespace Notification
 {
     /// <summary>
     /// NotifyControl.xaml 的交互逻辑
     /// </summary>
     public partial class NotifyControl : UserControl
     {
-        private readonly ObservableCollection<NotifyClass> _baseCollection;
+        private readonly ObservableCollection<NotificationOption> _baseCollection;
         private readonly Timer _timer;
         private bool _hidden;
 
-        public NotifyClass ViewModel { get; }
+        public NotificationOption ViewModel { get; }
 
-        public NotifyControl(NotifyClass notifyClass, ObservableCollection<NotifyClass> baseCollection)
+        public NotifyControl(NotificationOption notificationOption, ObservableCollection<NotificationOption> baseCollection)
         {
             _baseCollection = baseCollection;
             InitializeComponent();
-            if (notifyClass.IsEmpty)
+            DataContext = notificationOption;
+            ViewModel = notificationOption;
+
+            if (notificationOption.IsEmpty)
             {
-                _baseCollection.Remove(notifyClass);
+                _baseCollection.Remove(notificationOption);
                 this.Visibility = Visibility.Collapsed;
                 return;
             }
 
-            DataContext = notifyClass;
-            ViewModel = notifyClass;
-            if (notifyClass.FadeoutTime > TimeSpan.FromSeconds(1))
+            if (notificationOption.NotificationType == NotificationType.Alert &&
+                notificationOption.FadeoutTime > TimeSpan.FromSeconds(1))
             {
                 _timer = new Timer(obj =>
                 {
-                    Dispatcher.Invoke(HideThis);
+                    Dispatcher.Invoke(TriggerHide);
                     _timer?.Dispose();
-                }, null, (int)notifyClass.FadeoutTime.TotalMilliseconds, Timeout.Infinite);
+                }, null, (int)notificationOption.FadeoutTime.TotalMilliseconds, Timeout.Infinite);
             }
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            ShowThis();
+            //return;
+            TriggerShow();
         }
 
-        private void ShowThis()
+        private void NotifyControl_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.NotificationType != NotificationType.Alert)
+            {
+                return;
+            }
+
+            TriggerHide();
+        }
+
+        #region Animation
+
+        private void TriggerShow()
         {
             var height = NotifyBorder.ActualHeight;
-            var sineEase = new CircleEase
+            var easing = new CircleEase
             {
                 EasingMode = EasingMode.EaseOut,
             };
-            var timeSpan = TimeSpan.FromMilliseconds(200);
+            var timing = TimeSpan.FromMilliseconds(200);
 
-            var heightAni = new DoubleAnimation
+            var vector = new DoubleAnimation
             {
                 From = 0,
                 To = height,
-                EasingFunction = sineEase,
-                Duration = new Duration(timeSpan)
+                EasingFunction = easing,
+                Duration = new Duration(timing)
             };
 
-            Storyboard.SetTargetName(heightAni, NotifyBorder.Name);
-            Storyboard.SetTargetProperty(heightAni,
-                new PropertyPath(Border.HeightProperty));
-            var opacityAni = new DoubleAnimation
+            Storyboard.SetTargetName(vector, NotifyBorder.Name);
+            Storyboard.SetTargetProperty(vector,
+                new PropertyPath(HeightProperty));
+
+            var fade = new DoubleAnimation
             {
                 From = 0,
                 To = 0,
-                EasingFunction = sineEase,
-                Duration = new Duration(timeSpan)
+                EasingFunction = easing,
+                Duration = new Duration(timing)
             };
-            Storyboard.SetTargetName(opacityAni, NotifyBorder.Name);
-            Storyboard.SetTargetProperty(opacityAni,
-                new PropertyPath(Border.OpacityProperty));
+            Storyboard.SetTargetName(fade, NotifyBorder.Name);
+            Storyboard.SetTargetProperty(fade,
+                new PropertyPath(OpacityProperty));
 
-            var myStoryboard = new Storyboard();
-            myStoryboard.Children.Add(heightAni);
-            myStoryboard.Children.Add(opacityAni);
-            myStoryboard.Completed += ShowThisNextAction;
-            myStoryboard.Begin(this);
+            var sb = new Storyboard();
+            sb.Children.Add(vector);
+            sb.Children.Add(fade);
+            sb.Completed += ShowThisNextAction;
+            sb.Begin(this);
         }
 
         private void ShowThisNextAction(object sender, EventArgs e)
         {
             var width = NotifyBorder.ActualWidth;
-            var sineEase = new CircleEase
+            var easing = new CircleEase
             {
                 EasingMode = EasingMode.EaseOut,
             };
-            var timeSpan = TimeSpan.FromMilliseconds(300);
-            var opacityAni = new DoubleAnimation
+            var timing = TimeSpan.FromMilliseconds(300);
+            var fade = new DoubleAnimation
             {
                 From = 0,
                 To = 1,
-                EasingFunction = sineEase,
-                Duration = new Duration(timeSpan)
+                EasingFunction = easing,
+                Duration = new Duration(timing)
             };
-            Storyboard.SetTargetName(opacityAni, NotifyBorder.Name);
-            Storyboard.SetTargetProperty(opacityAni,
-                new PropertyPath(Border.OpacityProperty));
+            Storyboard.SetTargetName(fade, NotifyBorder.Name);
+            Storyboard.SetTargetProperty(fade,
+                new PropertyPath(OpacityProperty));
 
-            var marginAni = new ThicknessAnimation
+            var vector = new ThicknessAnimation
             {
                 From = new Thickness(width, 0, -width, 0),
                 To = new Thickness(0),
-                EasingFunction = sineEase,
-                Duration = new Duration(timeSpan)
+                EasingFunction = easing,
+                Duration = new Duration(timing)
             };
-            Storyboard.SetTargetName(marginAni, NotifyBorder.Name);
-            Storyboard.SetTargetProperty(marginAni,
-                new PropertyPath(Border.MarginProperty));
+            Storyboard.SetTargetName(vector, NotifyBorder.Name);
+            Storyboard.SetTargetProperty(vector,
+                new PropertyPath(MarginProperty));
 
-            var myStoryboard = new Storyboard();
-            myStoryboard.Children.Add(opacityAni);
-            myStoryboard.Children.Add(marginAni);
-            myStoryboard.Begin(this);
+            var sb = new Storyboard();
+            sb.Children.Add(fade);
+            sb.Children.Add(vector);
+            sb.Begin(this);
         }
 
-        private void HideThis()
+        private void TriggerHide()
         {
             if (_hidden) return;
             _hidden = true;
 
             var width = NotifyBorder.ActualWidth;
-            var sineEase = new CubicEase
+            var easing = new CubicEase
             {
                 EasingMode = EasingMode.EaseOut,
             };
-            var timeSpan = TimeSpan.FromMilliseconds(300);
-            var opacityAni = new DoubleAnimation
+            var timing = TimeSpan.FromMilliseconds(300);
+            var fade = new DoubleAnimation
             {
                 From = 1,
                 To = 0,
-                EasingFunction = sineEase,
-                Duration = new Duration(timeSpan)
+                EasingFunction = easing,
+                Duration = new Duration(timing)
             };
-            Storyboard.SetTargetName(opacityAni, NotifyBorder.Name);
-            Storyboard.SetTargetProperty(opacityAni,
-                new PropertyPath(Border.OpacityProperty));
+            Storyboard.SetTargetName(fade, NotifyBorder.Name);
+            Storyboard.SetTargetProperty(fade,
+                new PropertyPath(OpacityProperty));
 
-            var marginAni = new ThicknessAnimation
+            var vector = new ThicknessAnimation
             {
                 From = new Thickness(0),
                 To = new Thickness(width, 0, -width, 0),
-                EasingFunction = sineEase,
-                Duration = new Duration(timeSpan)
+                EasingFunction = easing,
+                Duration = new Duration(timing)
             };
-            Storyboard.SetTargetName(marginAni, NotifyBorder.Name);
-            Storyboard.SetTargetProperty(marginAni,
-                new PropertyPath(Border.MarginProperty));
+            Storyboard.SetTargetName(vector, NotifyBorder.Name);
+            Storyboard.SetTargetProperty(vector,
+                new PropertyPath(MarginProperty));
 
-            var myStoryboard = new Storyboard();
-            myStoryboard.Children.Add(opacityAni);
-            myStoryboard.Children.Add(marginAni);
-            myStoryboard.Completed += HideThisNextAction;
-            myStoryboard.Begin(this);
+            var sb = new Storyboard();
+            sb.Children.Add(fade);
+            sb.Children.Add(vector);
+            sb.Completed += HideThisNextAction;
+            sb.Begin(this);
             _baseCollection.Remove(this.ViewModel);
         }
 
         private void HideThisNextAction(object sender, EventArgs e)
         {
             var height = NotifyBorder.ActualHeight;
-            var sineEase = new CircleEase
+            var easing = new CircleEase
             {
                 EasingMode = EasingMode.EaseOut,
             };
-            var timeSpan = TimeSpan.FromMilliseconds(200);
+            var timing = TimeSpan.FromMilliseconds(200);
 
-            var heightAni = new DoubleAnimation
+            var vector = new DoubleAnimation
             {
                 From = height,
                 To = 0,
-                EasingFunction = sineEase,
-                Duration = new Duration(timeSpan)
+                EasingFunction = easing,
+                Duration = new Duration(timing)
             };
 
-            Storyboard.SetTargetName(heightAni, NotifyBorder.Name);
-            Storyboard.SetTargetProperty(heightAni,
-                new PropertyPath(Border.HeightProperty));
-            var opacityAni = new DoubleAnimation
+            Storyboard.SetTargetName(vector, NotifyBorder.Name);
+            Storyboard.SetTargetProperty(vector,
+                new PropertyPath(HeightProperty));
+            var fade = new DoubleAnimation
             {
                 From = 0,
                 To = 0,
-                EasingFunction = sineEase,
-                Duration = new Duration(timeSpan)
+                EasingFunction = easing,
+                Duration = new Duration(timing)
             };
-            Storyboard.SetTargetName(opacityAni, NotifyBorder.Name);
-            Storyboard.SetTargetProperty(opacityAni,
-                new PropertyPath(Border.OpacityProperty));
+            Storyboard.SetTargetName(fade, NotifyBorder.Name);
+            Storyboard.SetTargetProperty(fade,
+                new PropertyPath(OpacityProperty));
 
-            var myStoryboard = new Storyboard();
-            myStoryboard.Children.Add(heightAni);
-            myStoryboard.Children.Add(opacityAni);
-            myStoryboard.Begin(this);
+            var sb = new Storyboard();
+            sb.Children.Add(vector);
+            sb.Children.Add(fade);
+            sb.Begin(this);
         }
 
-        private void NotifyControl_Click(object sender, RoutedEventArgs e)
+        #endregion
+
+        private void YesButton_Click(object sender, RoutedEventArgs e)
         {
-            HideThis();
+            ViewModel.YesCallback?.Invoke();
+            TriggerHide();
+        }
+
+        private void NoButton_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.NoCallback?.Invoke();
+            TriggerHide();
         }
     }
 }

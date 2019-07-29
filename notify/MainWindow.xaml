@@ -1,10 +1,11 @@
 ﻿<Window
-    x:Class="notify.MainWindow"
+    x:Class="Notification.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:notify"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:notification="clr-namespace:Notification"
+    x:Name="MainWin"
     Title="MainWindow"
     Width="800"
     Height="450"
@@ -12,13 +13,14 @@
     Loaded="Window_Loaded"
     mc:Ignorable="d">
     <Grid>
-        <local:NotifyOverlay
+        <notification:NotifyOverlay
             x:Name="notify1"
             Width="350"
             Margin="10"
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom" />
         <Button
+            x:Name="AddButton"
             Margin="10"
             Padding="10,5"
             HorizontalAlignment="Left"
